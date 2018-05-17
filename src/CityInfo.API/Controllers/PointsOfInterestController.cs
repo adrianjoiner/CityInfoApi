@@ -27,14 +27,12 @@ namespace CityInfo.API.Controllers
         public IActionResult GetPointOfInterest(int cityId, int id)
         {
             var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
-
             if (city == null)
             {
                 return NotFound();
             }
 
             var pointOfInterest = city.PointsOfInterest.FirstOrDefault(p => p.Id == cityId);
-
             if (pointOfInterest == null)
             {
                 return NotFound();
@@ -91,6 +89,45 @@ namespace CityInfo.API.Controllers
 			city.PointsOfInterest.Add(finalPointOfInterest);
 
 			return CreatedAtRoute("GetPointOfInterest", new { cityId = cityId, id = finalPointOfInterest.Id }, finalPointOfInterest );
+
+		}
+
+		[HttpPut("{cityId}/pointsofinterest/{id}")]
+		public IActionResult UpdatePointOfInterest(int cityId, int id,
+			[FromBody] PointOfInterestForUpdateDto pointOfInterest)
+		{
+			if (pointOfInterest == null)
+			{
+				return BadRequest();
+			}
+
+			if (pointOfInterest.Name == pointOfInterest.Description)
+			{
+				ModelState.AddModelError("Description", "The provided description should be different from the name"); // custom model error
+			}
+
+			if (!ModelState.IsValid)
+			{
+				return BadRequest(ModelState); // returning the state (error) message
+			}
+
+			var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
+			if (city == null)
+			{
+				return NotFound();
+			}
+
+			var pointOfInterestFromStore = city.PointsOfInterest.FirstOrDefault(p => p.Id == id);
+			if (pointOfInterestFromStore == null)
+			{
+				return NotFound();
+			}
+
+			// http says should always update all fields or update missing field to the default value
+			pointOfInterestFromStore.Name = pointOfInterest.Name;
+			pointOfInterestFromStore.Description = pointOfInterest.Description;
+
+			return NoContent(); // as consumer already knows the data so not a 200 returning the info
 
 		}
     }
