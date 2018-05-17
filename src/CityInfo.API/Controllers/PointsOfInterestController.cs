@@ -33,7 +33,7 @@ namespace CityInfo.API.Controllers
                 return NotFound();
             }
 
-            var pointOfInterest = city.PointsOfInterest.FirstOrDefault(p => p.Id == id);
+            var pointOfInterest = city.PointsOfInterest.FirstOrDefault(p => p.Id == cityId);
 
             if (pointOfInterest == null)
             {
@@ -41,6 +41,47 @@ namespace CityInfo.API.Controllers
             }
 
             return Ok(pointOfInterest);
+
         }
+
+		[HttpPost("{cityId}/pointsofinterest")]
+		public IActionResult CreatePointOfInterest(int cityId,
+			[FromBody] PointOfInterestForCreationDto pointOfInterest) // deserialises the posted body to match the 'dto
+		{
+			if (pointOfInterest == null)
+			{
+				return BadRequest();
+			}
+
+			var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
+
+			if (city == null)
+			{
+				return NotFound();
+			}
+
+			//var pointOfInterest = city.PointsOfInterest.FirstOrDefault(p => p.Id == cityId);
+
+			if (pointOfInterest == null)
+			{
+				return NotFound();
+			}
+
+			// REFACTOR: hack to generate next point of interest id
+			// linq, get all cities and there point of interest nos then get the highest number
+			var maxPointOfInterestId = CitiesDataStore.Current.Cities.SelectMany(c => c.PointsOfInterest).Max(p => p.Id);
+
+			var finalPointOfInterest = new PointOfInterestDto()
+			{
+				Id = ++maxPointOfInterestId,
+				Name = pointOfInterest.Name,
+				Description = pointOfInterest.Description
+			};
+
+			city.PointsOfInterest.Add(finalPointOfInterest);
+
+			return CreatedAtRoute("GetPointOfInterest", new { cityId = cityId, id = finalPointOfInterest.Id }, finalPointOfInterest );
+
+		}
     }
 }
