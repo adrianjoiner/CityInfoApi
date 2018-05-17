@@ -53,6 +53,16 @@ namespace CityInfo.API.Controllers
 				return BadRequest();
 			}
 
+			if (pointOfInterest.Name == pointOfInterest.Description)
+			{
+				ModelState.AddModelError("Description", "The provided description should be different from the name"); // custom model error
+			}
+
+			if (!ModelState.IsValid)
+			{
+				return BadRequest(ModelState); // returning the state (error) message
+			}
+
 			var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
 
 			if (city == null)
