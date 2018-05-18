@@ -1,4 +1,5 @@
 ﻿using CityInfo.API.Models;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -129,6 +130,59 @@ namespace CityInfo.API.Controllers
 
 			return NoContent(); // as consumer already knows the data so not a 200 returning the info
 
+		}
+
+		[HttpPatch("{cityId}/pointsofinterest/{id}")]
+		public IActionResult PartiallyUpdatePointOfInterest(int cityId, int id,
+			[FromBody] JsonPatchDocument<PointOfInterestForUpdateDto> patchDoc)
+		{
+			if (patchDoc == null)
+			{
+				return BadRequest();
+			}
+
+			var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
+			if (city == null)
+			{
+				return NotFound();
+			}
+
+			var pointOfInterestFromStore = city.PointsOfInterest.FirstOrDefault(p => p.Id == id);
+			if (pointOfInterestFromStore == null)
+			{
+				return NotFound();
+			}
+
+			var pointOfInterestToPatch = 
+				new PointOfInterestForUpdateDto()
+				{
+					Name = pointOfInterestFromStore.Name,
+					Description = pointOfInterestFromStore.Description
+				};
+
+			patchDoc.ApplyTo(pointOfInterestToPatch, ModelState); // passing in the model state gives us the state validations (length etc)
+
+			if (!ModelState.IsValid)
+			{
+				return BadRequest(ModelState);
+			}
+
+			if (pointOfInterestToPatch.Description == pointOfInterestToPatch.Name)
+			{
+				ModelState.AddModelError("Description", "Provided description must be different from name.");
+			}
+
+			// Trigger validation of model
+			TryValidateModel(pointOfInterestToPatch);
+			if (!ModelState.IsValid)
+			{
+				return BadRequest(ModelState);
+			}
+
+			pointOfInterestFromStore.Name = pointOfInterestToPatch.Name;
+			pointOfInterestFromStore.Description = pointOfInterestToPatch.Description;
+
+			return NoContent();
 		}
     }
 }
