@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CityInfo.API.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -22,15 +23,29 @@ namespace CityInfo.API
             services.AddMvc()
                 .AddMvcOptions(o => o.OutputFormatters.Add(
                     new XmlDataContractSerializerOutputFormatter()));
-                //.AddJsonOptions(o => {
-                //    if (o.SerializerSettings.ContractResolver != null)
-                //    {
-                //        var castedResolver = o.SerializerSettings.ContractResolver
-                //            as DefaultContractResolver;
-                //        castedResolver.NamingStrategy = null;
-                //    }
-                //});
-        }
+			//.AddJsonOptions(o => {
+			//    if (o.SerializerSettings.ContractResolver != null)
+			//    {
+			//        var castedResolver = o.SerializerSettings.ContractResolver
+			//            as DefaultContractResolver;
+			//        castedResolver.NamingStrategy = null;
+			//    }
+			//});
+
+			// Register our service with the container so we can inject it using the built in dependency injection system
+			// tranient: created each time requested, best for lightweight, stateless services
+			// scoped: created once per request
+			// singleton: created first time requested only. Future requests will use the same instance 
+
+			// shows how we can switch service providers
+#if DEBUG
+
+			services.AddTransient<IMailService, LocalMailService>(); // saying which IMailService to inject - makes it easy to switch
+#else
+			services.AddTransient<IMailService, CloudMailService>();
+#endif
+
+		}
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)

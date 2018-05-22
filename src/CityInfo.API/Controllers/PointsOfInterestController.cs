@@ -1,4 +1,5 @@
 ﻿using CityInfo.API.Models;
+using CityInfo.API.Services;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -12,11 +13,14 @@ namespace CityInfo.API.Controllers
     [Route("api/cities")]
     public class PointsOfInterestController : Controller
     {
-		// Inject a logger via Dependency Injection (here using Constructor injection)
+		// Inject a logger / service via Dependency Injection (here using Constructor injection)
 		private ILogger<PointsOfInterestController> _logger;
-		public PointsOfInterestController(ILogger<PointsOfInterestController> logger)
+		private IMailService _mailService; // holds the instance
+
+		public PointsOfInterestController(ILogger<PointsOfInterestController> logger, LocalMailService mailService)
 		{
 			_logger = logger;
+			_mailService = mailService; // set to the injected instance
 		}
 
         [HttpGet("{cityId}/pointsofinterest")]
@@ -218,6 +222,10 @@ namespace CityInfo.API.Controllers
 			}
 
 			city.PointsOfInterest.Remove(pointOfInterestFromStore);
+
+			_mailService.Send("Point of interest deleted.", 
+				$"Point of interest {pointOfInterestFromStore.Name} with id {pointOfInterestFromStore.Id} was deleted");
+
 
 			return NoContent();
 		}
