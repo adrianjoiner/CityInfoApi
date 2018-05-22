@@ -34,10 +34,13 @@ namespace CityInfo.API
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            // No need to add these loggers in ASP.NET Core 2.0: the call to WebHost.CreateDefaultBuilder(args) 
-            // in the Program class takes care of that.
+			// No need to add these loggers in ASP.NET Core 2.0: the call to WebHost.CreateDefaultBuilder(args) 
+			// in the Program class takes care of that.
 
-            //loggerFactory.AddConsole();
+			//loggerFactory.AddConsole();
+
+			loggerFactory.AddDebug();
+
 
             if (env.IsDevelopment())
             {
