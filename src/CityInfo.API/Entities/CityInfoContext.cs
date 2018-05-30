@@ -10,9 +10,9 @@ namespace CityInfo.API.Entities
     {
 		public CityInfoContext(DbContextOptions<CityInfoContext> options) : base(options)
 		{
-			// check for database and create if not there
+			// Execute db migrations to get us to the required version
 			// Note this is just registering the db and not physically creating it
-			Database.EnsureCreated();
+			Database.Migrate();
 		}
 		public DbSet<City> Cities { get; set; }
 		public DbSet<PointOfInterest> PointsOfInterest { get; set; }
