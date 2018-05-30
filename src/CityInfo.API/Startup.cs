@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CityInfo.API.Entities;
 using CityInfo.API.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -42,8 +44,8 @@ namespace CityInfo.API
 			//    }
 			//});
 
-			// Register our service with the container so we can inject it using the built in dependency injection system
-			// tranient: created each time requested, best for lightweight, stateless services
+			// Register our services with the container so we can inject them using the built in dependency injection system
+			// transient: created each time requested, best for lightweight, stateless services
 			// scoped: created once per request
 			// singleton: created first time requested only. Future requests will use the same instance 
 
@@ -54,6 +56,10 @@ namespace CityInfo.API
 #else
 			services.AddTransient<IMailService, CloudMailService>();
 #endif
+			// You can see your local sql server in SQL Server Object Explorer un View in VS
+			var connectionString = @"Server=(localdb)\mssqllocaldb;Database=CityInfoDB;Trusted_Connection=True;";
+			services.AddDbContext<CityInfoContext>(o => o.UseSqlServer(connectionString));
+
 
 		}
 
