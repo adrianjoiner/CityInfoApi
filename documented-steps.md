@@ -8,3 +8,10 @@
 
 - Manually deleted the db from SQl server explorer else the 'migrate' will try to update the existing rather than create new
 
+## Safely storing sensitive data
+- Use app settings for non sensitive data (as could go to source control etc)
+- Use environment variables for sensitive as they override app settings
+
+
+## Seeding the database
+
